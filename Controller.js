@@ -1,5 +1,5 @@
 function log(str) {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Log');
+  const sheet = controllingSS.getSheetByName('Log');
   sheet.getRange('A1').setValue(sheet.getRange('A1').getValue() + '\n' +str)
 }
 
