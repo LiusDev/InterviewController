@@ -1,5 +1,5 @@
 function onEdit(event) {
-    const srcSheet = event.source.getActiveSheet();
+    var srcSheet = event.source.getActiveSheet();
 
     if(srcSheet.getName()==='Check_in') {
         //hide all checked row

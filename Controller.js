@@ -1,16 +1,16 @@
+function unitTest() {
+  log(Config.checkinSheetName)
+}
+
 function log(str) {
-  const sheet = controllingSS.getSheetByName('Log');
+  var sheet = Config.controllingSS.getSheetByName('Log');
   sheet.getRange('A1').setValue(sheet.getRange('A1').getValue() + '\n' +str)
 }
 
-function unitTest() {
-  log(checkinSheetName)
-}
-
 function sort() {
-  const statusCol = 6;
-  const sheet = controllingSS.getSheetByName(controllingSheetName);
-  const range = sheet.getRange('A2:I');
+  var statusCol = 6;
+  var sheet = Config.controllingSS.getSheetByName(controllingSheetName);
+  var range = sheet.getRange('A2:I');
   range.sort( { column : statusCol, ascending: true });
   
 }
@@ -19,16 +19,16 @@ function setAuthentication(email, deskSheet, accessNotations) {
 }
 
 function addToTable(deskCode, row) {
-  const checkinSheet = checkinSS.getSheetByName(checkinSheetName);
-  const sheet = desksMap.get(deskCode);
+  var checkinSheet = Config.checkinSS.getSheetByName(Config.checkinSheetName);
+  var sheet = Config.desksMap.get(deskCode);
 
-  const addedRow = sheet.getRange('N1').getValue() + 2;
+  var addedRow = sheet.getRange('N1').getValue() + 2;
   sheet.getRange('B' + addedRow).setValues(checkinSheet.getRange('B' + row).getValues());
 
-  for (let [code, deskSS] of Object.entries(desksMap)) {
+  for (let [code, deskSS] of Object.entries(Config.desksMap)) {
     if (deskSS.getName() !== sheet.getName()) {
-        const deskSheet = deskSS.getSheetByName(controllingSheetName);
-        const deskRow = deskSheet.getRange('N1').getValue() + 2;
+        var deskSheet = deskSS.getSheetByName(Config.controllingSheetName);
+        var deskRow = deskSheet.getRange('N1').getValue() + 2;
         if (deskSheet.getRange('B' + deskRow).getValue() === checkinSheet.getRange('B' + row).getValue()) {
           deskSheet.getRange('B' + deskRow).setValue('');
         }
@@ -38,15 +38,15 @@ function addToTable(deskCode, row) {
 
 
 function sortID() {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Check_in');
-  const range = sheet.getRange("A2:G");
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Check_in');
+  var range = sheet.getRange("A2:G");
   range.sort({column: 1, ascending: true});
 }
 
 
 function sortByTime() {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(controllingSheetName);
-  const range = sheet.getRange("A2:J");
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(Config.controllingSheetName);
+  var range = sheet.getRange("A2:J");
   range.sort({column: 5, ascending: true});
   range.sort({column: 10, ascending: true});
 }

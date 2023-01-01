@@ -1,9 +1,0 @@
-#!/bin/bash
-cd config/
-clasp push
-cd ../controller
-clasp push
-cd ../interview_desk
-clasp push
-cd ../checkin
-clasp push

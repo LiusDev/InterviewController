@@ -1,7 +1,7 @@
 // TODO find candinate infomation by ID from check_in sheet (ID, Name, Department, Interview time), update to the same row of interview desk sheet
-const checkinSheet = checkinSS.getSheetByName('Check_in');
-const interviewDeskSS = desksMap['Bàn PV 1'];
-const interviewDeskSheet = interviewDeskSS.getSheetByName('Bàn PV 1')
+var checkinSheet = checkinSS.getSheetByName('Check_in');
+var interviewDeskSS = desksMap['Bàn PV 1'];
+var interviewDeskSheet = interviewDeskSS.getSheetByName('Bàn PV 1')
 function checkCandinateIdUpdate() {
     var idCols = interviewDeskSheet.getRange('B2:B').getValues();
     idCols.forEach(function(id) {

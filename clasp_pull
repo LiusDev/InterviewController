@@ -1,9 +1,0 @@
-#!/bin/bash
-cd config/
-clasp pull
-cd ../controller
-clasp pull
-cd ../interview_desk
-clasp pull
-cd ../checkin
-clasp pull
