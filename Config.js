@@ -5,22 +5,22 @@ var deskConfigSheetName = 'DeskConfig';
 var deskStatusRange = 'K1';
 var deskControlStatusRange = 'M2:O';
 var deskControlCols = {
-  'room': 13,
-  'desk': 14,
-  'department': 15,
-  'status': 16,
+  room: 13,
+  desk: 14,
+  department: 15,
+  status: 16,
 }
 var metadataValueRange = 'A2:C';
 var dekConfigValueRange = 'A2:C';
 var deskConfigCols = {
-  'room': 1,
-  'desk': 2,
-  'department': 3
+  room: 1,
+  desk: 2,
+  department: 3
 };
 var metadataCols = {
-  'id': 1,
-  'name': 2,
-  'url': 3
+  id: 1,
+  name: 2,
+  url: 3
 };
 function onOpenConfig() {
   var ui = SpreadsheetApp.getUi();
@@ -73,4 +73,15 @@ function generateAllFile() {
     //TODO: add Info sheet for desk
     //TODO: add authentication for desk
   }
+}
+
+function getMetadataSS(name) {
+  var metadataSheet = configSS.getSheetByName(metadataSheetName);
+  var metadataValues = metadataSheet.getRange(metadataValueRange).getValues();
+  for (var i = 0; i < metadataValues.length; i++) {
+    if (metadataValues[i][metadataCols.name - 1] === name) {
+      return SpreadsheetApp.openById(metadataValues[i][metadataCols.id - 1]);
+    }
+  }
+  return null;
 }

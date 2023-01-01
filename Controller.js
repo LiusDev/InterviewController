@@ -1,106 +1,45 @@
-function unitTest() {
-  log(Config.checkinSheetName)
-}
-
-function log(str) {
-  var sheet = Config.controllingSS.getSheetByName('Log');
-  sheet.getRange('A1').setValue(sheet.getRange('A1').getValue() + '\n' +str)
-}
+var controlRange = "A2:I";
 
 function sort() {
-  var statusCol = 6;
-  var sheet = Config.controllingSS.getSheetByName(controllingSheetName);
-  var range = sheet.getRange('A2:I');
-  range.sort( { column : statusCol, ascending: true });
-  
+    getMetadataSS(controllingSheetName)
+        .getSheetByName(controllingSheetName)
+        .getRange(controlRange)
+        .sort( { column : candidateCols.status, ascending: true });
 }
 
-function setAuthentication(email, deskSheet, accessNotations) {
+function moveToDeskSheet(id, deskCode) {
+    var deskName = deskPrefix + deskCode;
+    var deskSheet = getMetadataSS(deskName).getSheetByName(deskName);
+    //TODO: move an id to desk sheet
 }
 
-function addToTable(deskCode, row) {
-  var checkinSheet = Config.checkinSS.getSheetByName(Config.checkinSheetName);
-  var sheet = Config.desksMap.get(deskCode);
+function removeFromDesks(id) {
+    //TODO: remove id from all desks
+}
 
-  var addedRow = sheet.getRange('N1').getValue() + 2;
-  sheet.getRange('B' + addedRow).setValues(checkinSheet.getRange('B' + row).getValues());
-
-  for (let [code, deskSS] of Object.entries(Config.desksMap)) {
-    if (deskSS.getName() !== sheet.getName()) {
-        var deskSheet = deskSS.getSheetByName(Config.controllingSheetName);
-        var deskRow = deskSheet.getRange('N1').getValue() + 2;
-        if (deskSheet.getRange('B' + deskRow).getValue() === checkinSheet.getRange('B' + row).getValue()) {
-          deskSheet.getRange('B' + deskRow).setValue('');
+function onEditControl(event){
+    var srcSheet = event.source.getActiveSheet();
+    var srcCell = srcSheet.getActiveCell();
+    if (srcCell.getColumn() === candidateCols.id) {
+        var id = srcSheet.getRange(srcCell.getRow(), candidateCols.id).getValue();
+        if (id !== "") {
+            var checkinData = getCheckinData(id);
+            srcSheet.getRange(srcCell.getRow(), candidateCols.name).setValue(checkinData[checkinCols.name - 1]);
+            srcSheet.getRange(srcCell.getRow(), candidateCols.department).setValue(checkinData[checkinCols.department - 1]);
+            srcSheet.getRange(srcCell.getRow(), candidateCols.shift).setValue(checkinData[checkinCols.shift - 1]);
+            srcSheet.getRange(srcCell.getRow(), candidateCols.status).setValue(statusValues[0]);
+        } else {
+            srcSheet.getRange(srcCell.getRow(), candidateCols.name).setValue("");
+            srcSheet.getRange(srcCell.getRow(), candidateCols.department).setValue("");
+            srcSheet.getRange(srcCell.getRow(), candidateCols.shift).setValue("");
+            srcSheet.getRange(srcCell.getRow(), candidateCols.status).setValue("");
+            removeFromDesks(id);
         }
     }
-  }
-}
-
-
-function sortID() {
-  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Check_in');
-  var range = sheet.getRange("A2:G");
-  range.sort({column: 1, ascending: true});
-}
-
-
-function sortByTime() {
-  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(Config.controllingSheetName);
-  var range = sheet.getRange("A2:J");
-  range.sort({column: 5, ascending: true});
-  range.sort({column: 10, ascending: true});
-}
-
-function onEdit(event){
-
-  var sheet = event.source.getActiveSheet();
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var statusCol = 6;
-  var decideCol = 8;
-  var tableCol = 7;
-  if (sheet.getName() == controllingSheetName) {
-    var editedCell = sheet.getActiveCell();
-    if(editedCell.getColumn() == statusCol){
-      sort();
+    if (srcCell.getColumn() === candidateCols.desk) {
+        id = srcSheet.getRange(srcCell.getRow(), candidateCols.id).getValue();
+        var deskCode = srcSheet.getRange(srcCell.getRow(), candidateCols.desk).getValue();
+        moveToDeskSheet(id, deskCode);
     }
-    if(editedCell.getColumn() == tableCol){
-      var tableNumber = editedCell.getValue();
-      addToTable(tableNumber, editedCell.getRow());
-    }
-  }
-
-  if (sheet.getName() != 'Check_in' && sheet.getName() != controllingSheetName && sheet.getName() != 'Thông tin ứng viên') {
-    var editedCell = sheet.getActiveCell();
-    var valueCell = editedCell.getValue();
-    var check_inSheet = ss.getSheetByName(controllingSheetName);
-    var id = id = sheet.getRange('B' + editedCell.getRow()).getValue();
-    if(editedCell.getColumn() == statusCol){
-      for (var i = 2; i < 200; i++) {
-        if (check_inSheet.getRange(i, 2).getValue() == id) {
-          check_inSheet.getRange(i, 6).setValue(valueCell);
-          sort();
-        }
-      }
-    }
-
-    if(editedCell.getColumn() == decideCol){
-      id = sheet.getRange('B' + editedCell.getRow()).getValue();
-      for (var i = 2; i < 200; i++) {
-        if (check_inSheet.getRange(i, 2).getValue() == id) {
-          check_inSheet.getRange(i, 8).setValue(valueCell);
-        }
-      }
-    }
-
-    var typeCol = 4;
-    if(editedCell.getColumn() == typeCol){
-      id = sheet.getRange('B' + editedCell.getRow()).getValue();
-      for (var i = 2; i < 200; i++) {
-        if (check_inSheet.getRange(i, 2).getValue() == id) {
-          check_inSheet.getRange(i, 4).setValue(valueCell);
-        }
-      }
-    }
-  }
 }
 

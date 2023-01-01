@@ -8,13 +8,13 @@ var checkinCols = {
 };
 
 function moveToControlSheet(id) {
-    var controllingSheet = SpreadsheetApp.openById(controllingTemplateId).getSheetByName(controllingSheetName);
+    var controllingSheet = getMetadataSS(controllingSheetName).getSheetByName(controllingSheetName);
     //TODO: move id to controlling sheet
 
 }
 
 function removeFromControlSheet(id) {
-    var controllingSheet = SpreadsheetApp.openById(controllingTemplateId).getSheetByName(controllingSheetName);
+    var controllingSheet = getMetadataSS(controllingSheetName).getSheetByName(controllingSheetName);
     //TODO: remove id from controlling sheet
 }
 
@@ -31,4 +31,11 @@ function onEditCheckin(event) {
             removeFromControlSheet(id);
         }
     }
+}
+
+function getCheckinData(id) {
+    var checkinValues = getMetadataSS(checkinSheetName).getSheetByName(checkinSheetName).getRange(checkinValueRange).getValues();
+    return checkinValues.find(function (row) {
+        return row[checkinCols.id - 1] === id;
+    });
 }
