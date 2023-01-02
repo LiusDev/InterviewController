@@ -24,16 +24,32 @@ function moveToDeskSheet(id, deskCode) {
     }
     controllerSheet.getRange(controlRange).getValues().find(function (row, index) {
         if (row[candidateCols.id - 1] === id) {
-            controllerSheet.getRange(index + 2, candidateCols.department).setFormula('=\'' + deskName + '\'!C' + lineNo);
-            controllerSheet.getRange(index + 2, candidateCols.shift).setFormula('=\'' + deskName + '\'!D' + lineNo);
-            controllerSheet.getRange(index + 2, candidateCols.status).setFormula('=\'' + deskName + '\'!E' + lineNo);
+            controllerSheet.getRange(index + 2, candidateCols.department).setFormula('=\'' + deskName + '\'!D' + lineNo);
+            controllerSheet.getRange(index + 2, candidateCols.shift).setFormula('=\'' + deskName + '\'!E' + lineNo);
+            controllerSheet.getRange(index + 2, candidateCols.status).setFormula('=\'' + deskName + '\'!F' + lineNo);
             controllerSheet.getRange(index + 2, candidateCols.decision).setFormula('=\'' + deskName + '\'!H' + lineNo);
         }
     });
+    removeFromDesks(id, deskCode);
 }
 
 function removeFromDesks(id, exceptDesk) {
-    //TODO: remove id from all desks
+    //remove id from all desks except exceptDesk
+    //TODO: remove decision column
+    var desks = getDesks();
+    desks.forEach(function (desk) {
+        if (desk[deskConfigCols.room] !== exceptDesk) {
+            var deskName = deskPrefix + desk[deskConfigCols.room];
+            var deskSS = getMetadataSS(deskName);
+            var deskSheet = deskSS.getSheetByName(deskName);
+            var deskData = deskSheet.getRange(controlRange).getValues();
+            deskData.find(function (row, index) {
+                if (row[candidateCols.id - 1] === id) {
+                    fillData(deskSheet, index + 2, '', []);
+                }
+            });
+        }
+    });
 }
 
 function onEditController(event){
@@ -44,7 +60,6 @@ function onEditController(event){
     }
     if (srcCell.getColumn() === candidateCols.id) {
         var id = srcSheet.getRange(srcCell.getRow(), candidateCols.id).getValue();
-        log("id: " + id);
         if (id !== '') {
             updateControllerData(id);
         } else {
@@ -54,8 +69,18 @@ function onEditController(event){
     if (srcCell.getColumn() === candidateCols.desk) {
         id = srcSheet.getRange(srcCell.getRow(), candidateCols.id).getValue();
         var deskCode = srcSheet.getRange(srcCell.getRow(), candidateCols.desk).getValue();
-        moveToDeskSheet(id, deskCode);
+        if (deskCode === '') {
+            var checkinData = getCheckinData(id);
+            fillData(srcSheet, srcCell.getRow(), id, checkinData);
+            if (id !== '') {
+                srcSheet.getRange(srcCell.getRow(), candidateCols.status).setValue(statusValues[0]);
+            }
+            removeFromDesks(id, -1)
+        } else {
+            moveToDeskSheet(id, deskCode);
+        }
     }
+    sort();
 }
 
 function updateControllerData(id) {
@@ -68,6 +93,7 @@ function updateControllerData(id) {
     if (id !== '') {
         controllerSheet.getRange(lineNo, candidateCols.status).setValue(statusValues[0]);
     }
+    sort();
 }
 
 function removeControllerData(id) {
@@ -78,6 +104,7 @@ function removeControllerData(id) {
             fillData(controllerSheet, index + 2, '', []);
         }
     });
+    sort();
 }
 
 function doPostController(e) {
@@ -92,4 +119,3 @@ function doPostController(e) {
         removeControllerData(data.id);
     }
 }
-

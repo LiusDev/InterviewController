@@ -8,15 +8,16 @@ var checkinCols = {
 };
 
 function moveToControlSheet(id) {
-    //TODO: move id to controlling sheet
+    //move id to controlling sheet
     var data = '{"action": "update", "id": "' + id + '"}';
     fetchPost(data);
 
 }
 
 function removeFromControlSheet(id) {
-    var controllingSheet = getMetadataSS(controllingSheetName).getSheetByName(controllingSheetName);
-    //TODO: remove id from controlling sheet
+    //remove id from controlling sheet
+    var data = '{"action": "remove", "id": "' + id + '"}';
+    fetchPost(data);
 }
 
 function onEditCheckin(event) {

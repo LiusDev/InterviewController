@@ -96,3 +96,15 @@ function getMetadataSS(name) {
   }
   return null;
 }
+
+function getDesks() {
+    var deskConfigValues = SpreadsheetApp.openById(configTemplateId).getSheetByName(deskConfigSheetName).getRange(dekConfigValueRange).getValues();
+    var desks = [];
+    for (var i = 0; i < deskConfigValues.length; i++) {
+        if (deskConfigValues[i][deskConfigCols.desk - 1] === '') {
+        break;
+        }
+        desks.push(deskConfigValues[i]);
+    }
+    return desks;
+}
