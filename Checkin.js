@@ -8,8 +8,9 @@ var checkinCols = {
 };
 
 function moveToControlSheet(id) {
-    var controllingSheet = getMetadataSS(controllingSheetName).getSheetByName(controllingSheetName);
     //TODO: move id to controlling sheet
+    var data = '{"action": "update", "id": "' + id + '"}';
+    fetchPost(data);
 
 }
 

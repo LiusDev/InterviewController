@@ -1,5 +1,5 @@
 // WARNING: THIS FILE ONLY USE WHEN CONFIG SPREADSHEET IS ACTIVE
-var configSS = SpreadsheetApp.getActiveSpreadsheet();
+var currentSS = SpreadsheetApp.getActiveSpreadsheet();
 var metadataSheetName = 'Metadata';
 var deskConfigSheetName = 'DeskConfig';
 var deskStatusRange = 'K1';
@@ -34,28 +34,35 @@ function onOpenConfig() {
 
 function addMetadata(meta) {
   var formula = '=COUNTA(' + metadataSheetName + '!' + metadataValueRange + ') / 3 + 2';
-  var lineNo = evalFormula(configSS, formula);
-  var metadataSheet = configSS.getSheetByName(metadataSheetName);
+  var lineNo = evalFormula(currentSS, formula);
+  var metadataSheet = currentSS.getSheetByName(metadataSheetName);
   metadataSheet.getRange(lineNo, metadataCols.id).setValue(meta.getId());
   metadataSheet.getRange(lineNo, metadataCols.name).setValue(meta.getName());
   metadataSheet.getRange(lineNo, metadataCols.url).setValue(meta.getUrl());
 }
 
 function generateAllFile() {
-  var currentFolder = DriveApp.getFileById(configSS.getId()).getParents().next();
+  addMetadata(currentSS);
+  //remove all triggers
+  ScriptApp.getProjectTriggers().forEach(function (trigger) {
+    ScriptApp.deleteTrigger(trigger);
+  });
+  var currentFolder = DriveApp.getFileById(currentSS.getId()).getParents().next();
 
   // generate controlling spreadsheet file, then add its metadata to config spreadsheet
   var controllerSS = SpreadsheetApp.openById(controllingTemplateId).copy(controllingSheetName);
+  ScriptApp.newTrigger('JSLib.onEditController').forSpreadsheet(controllerSS).onEdit().create();
   DriveApp.getFileById(controllerSS.getId()).moveTo(currentFolder);
   addMetadata(controllerSS);
 
   // generate checkin spreadsheet file, then add its metadata to config spreadsheet
   var checkinSS = SpreadsheetApp.openById(checkinTemplateId).copy(checkinSheetName);
+  ScriptApp.newTrigger('JSLib.onEditCheckin').forSpreadsheet(checkinSS).onEdit().create();
   DriveApp.getFileById(checkinSS.getId()).moveTo(currentFolder);
   addMetadata(checkinSS);
 
   // generate interview desks spreadsheet file, then add its metadata to config spreadsheet
-  var deskConfigValues = configSS.getSheetByName(deskConfigSheetName).getRange(dekConfigValueRange).getValues();
+  var deskConfigValues = currentSS.getSheetByName(deskConfigSheetName).getRange(dekConfigValueRange).getValues();
   var controlSheet = controllerSS.getSheetByName(controllingSheetName);
   controlSheet.getRange(deskControlStatusRange).setValues(deskConfigValues);
   var deskFolder = currentFolder.createFolder(deskPrefix);
@@ -66,7 +73,11 @@ function generateAllFile() {
     }
     var deskName = deskPrefix + deskCode;
     var deskSS = SpreadsheetApp.openById(interviewDeskTemplateId).copy(deskName);
-    deskSS.getSheetByName(deskPrefix).setName(deskName).copyTo(controllerSS).setName(deskName);
+    var deskControlSheet = deskSS.getSheetByName(deskPrefix).setName(deskName)
+        .copyTo(controllerSS).setName(deskName);
+    deskControlSheet.getRange('A:R').setValue('');
+    deskControlSheet.getRange('A1').setFormula('=IMPORTRANGE("' + deskSS.getUrl() + '", "'+ deskName +'!A1:R")');
+    ScriptApp.newTrigger('JSLib.onEditDesk').forSpreadsheet(deskSS).onEdit().create();
     DriveApp.getFileById(deskSS.getId()).moveTo(deskFolder);
     controlSheet.getRange(i + 2, deskControlCols.status).setFormula('=\'' + deskName + '\'!' + deskStatusRange);
     addMetadata(deskSS);
@@ -76,7 +87,7 @@ function generateAllFile() {
 }
 
 function getMetadataSS(name) {
-  var metadataSheet = configSS.getSheetByName(metadataSheetName);
+  var metadataSheet = SpreadsheetApp.openById(configTemplateId).getSheetByName(metadataSheetName);
   var metadataValues = metadataSheet.getRange(metadataValueRange).getValues();
   for (var i = 0; i < metadataValues.length; i++) {
     if (metadataValues[i][metadataCols.name - 1] === name) {

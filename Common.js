@@ -1,6 +1,7 @@
+var webAppUrl = 'https://script.google.com/macros/s/AKfycby_20Wg82Lk6KJKOCwMYS_YRePQ3WwHZ4wAowXOb2EbcJcNUDITLnTYWsVmTnbxsMzI/exec';
 var logSheetName = 'LOG';
 var checkinSheetName = 'Check_in';
-var controllingSheetName = 'Điều Phối';
+var controllingSheetName = 'Điều phối';
 var deskPrefix = 'Bàn PV ';
 
 var configTemplateId = '1cVdamGyoX4tm6d2iuJDLmQSFmVqkSTHhR8CJs4LQZbk';
@@ -32,4 +33,29 @@ function evalFormula(spreadsheet, formula) {
     var value = tempRange.getValue();
     tempRange.setValue('');
     return value;
+}
+
+function fetchPost(data) {
+    var options = {
+        'method': 'post',
+        'payload': data
+    };
+    return UrlFetchApp.fetch(webAppUrl, options);
+}
+
+function fillData(sheet, row, id, checkinData) {
+    if (id !== '') {
+        sheet.getRange(row, candidateCols.name).setValue(checkinData[checkinCols.name - 1]);
+        sheet.getRange(row, candidateCols.department).setValue(checkinData[checkinCols.department - 1]);
+        sheet.getRange(row, candidateCols.shift).setValue(checkinData[checkinCols.shift - 1]);
+    } else {
+        sheet.getRange('B' + row + ":I" + row).setValue('');
+    }
+}
+
+function log(str) {
+    // get cell A1 of configSS then concat its value by str
+    var logSheet = SpreadsheetApp.openById(configTemplateId).getSheetByName(logSheetName);
+    var logRange = logSheet.getRange('A1');
+    logRange.setValue(logRange.getValue() + '\n' + str);
 }
