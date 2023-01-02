@@ -24,10 +24,10 @@ function moveToDeskSheet(id, deskCode) {
     }
     controllerSheet.getRange(controlRange).getValues().find(function (row, index) {
         if (row[candidateCols.id - 1] === id) {
-            controllerSheet.getRange(index + 2, candidateCols.department).setFormula('=\'' + deskName + '\'!D' + lineNo);
-            controllerSheet.getRange(index + 2, candidateCols.shift).setFormula('=\'' + deskName + '\'!E' + lineNo);
-            controllerSheet.getRange(index + 2, candidateCols.status).setFormula('=\'' + deskName + '\'!F' + lineNo);
-            controllerSheet.getRange(index + 2, candidateCols.decision).setFormula('=\'' + deskName + '\'!H' + lineNo);
+            controllerSheet.getRange(index + 2, candidateCols.department).setFormula('=QUERY(\'' + deskName + '\'!$B:$F; "select D,E,F where B = \'' + id + '\'")');
+            controllerSheet.getRange(index + 2, candidateCols.shift).setValue('');
+            controllerSheet.getRange(index + 2, candidateCols.status).setValue('');
+            controllerSheet.getRange(index + 2, candidateCols.decision).setFormula('=QUERY(\'' + deskName + '\'!$B:$H; "select H where B = \'' + id + '\'")');
         }
     });
     removeFromDesks(id, deskCode);
@@ -35,7 +35,6 @@ function moveToDeskSheet(id, deskCode) {
 
 function removeFromDesks(id, exceptDesk) {
     //remove id from all desks except exceptDesk
-    //TODO: remove decision column
     var desks = getDesks();
     desks.forEach(function (desk) {
         if (desk[deskConfigCols.room] !== exceptDesk) {
@@ -46,10 +45,12 @@ function removeFromDesks(id, exceptDesk) {
             deskData.find(function (row, index) {
                 if (row[candidateCols.id - 1] === id) {
                     fillData(deskSheet, index + 2, '', []);
+                    sortDesk(desk[deskConfigCols.room]);
                 }
             });
         }
     });
+
 }
 
 function onEditController(event){
@@ -74,6 +75,7 @@ function onEditController(event){
             fillData(srcSheet, srcCell.getRow(), id, checkinData);
             if (id !== '') {
                 srcSheet.getRange(srcCell.getRow(), candidateCols.status).setValue(statusValues[0]);
+                srcSheet.getRange(srcCell.getRow(), candidateCols.decision).setValue('');
             }
             removeFromDesks(id, -1)
         } else {
@@ -101,7 +103,11 @@ function removeControllerData(id) {
     var controllerData = controllerSheet.getRange(controlRange).getValues();
     controllerData.find(function (row, index) {
         if (row[candidateCols.id - 1] === id) {
-            fillData(controllerSheet, index + 2, '', []);
+            if (row[candidateCols.desk - 1] !== '') {
+                controllerSheet.getRange(index + 2, candidateCols.department).setValue('');
+            } else {
+                fillData(controllerSheet, index + 2, '', []);
+            }
         }
     });
     sort();
@@ -119,3 +125,5 @@ function doPostController(e) {
         removeControllerData(data.id);
     }
 }
+
+

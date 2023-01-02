@@ -15,3 +15,8 @@ function onEditDesk(event) {
         fetchPost(data);
     }
 }
+
+function sortDesk(deskCode) {
+    var deskName = deskPrefix + deskCode;
+    getMetadataSS(deskName).getSheetByName(deskName).getRange(controlRange).sort({column : candidateCols.status, ascending: false})
+}
