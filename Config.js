@@ -11,11 +11,13 @@ var deskControlCols = {
   status: 16,
 }
 var metadataValueRange = 'A2:C';
-var dekConfigValueRange = 'A2:C';
+var deskConfigValueRange = 'A2:E';
 var deskConfigCols = {
   room: 1,
   desk: 2,
-  department: 3
+  department: 3,
+  email1: 4,
+  email2: 5
 };
 var metadataCols = {
   id: 1,
@@ -54,6 +56,9 @@ function generateAllFile() {
   ScriptApp.newTrigger('JSLib.onEditController').forSpreadsheet(controllerSS).onEdit().create();
   DriveApp.getFileById(controllerSS.getId()).moveTo(currentFolder);
   addMetadata(controllerSS);
+  // TODO: set data validation of desk
+  // var rule = SpreadsheetApp.newDataValidation().requireNumberBetween(1,10).build();
+  // controllerSS.getRange('G2:G').setDataValidation(rule);
 
   // generate checkin spreadsheet file, then add its metadata to config spreadsheet
   var checkinSS = SpreadsheetApp.openById(checkinTemplateId).copy(checkinSheetName);
@@ -61,10 +66,14 @@ function generateAllFile() {
   DriveApp.getFileById(checkinSS.getId()).moveTo(currentFolder);
   addMetadata(checkinSS);
 
+
   // generate interview desks spreadsheet file, then add its metadata to config spreadsheet
-  var deskConfigValues = currentSS.getSheetByName(deskConfigSheetName).getRange(dekConfigValueRange).getValues();
+  var deskConfigSheet = currentSS.getSheetByName(deskConfigSheetName);
+  var deskConfigValues = deskConfigSheet.getRange(deskConfigValueRange).getValues();
   var controlSheet = controllerSS.getSheetByName(controllingSheetName);
-  controlSheet.getRange(deskControlStatusRange).setValues(deskConfigValues);
+
+  // controlSheet.getRange(deskControlStatusRange).setValues(deskConfigValues);
+  controlSheet.getRange(deskControlStatusRange).setValues(deskConfigSheet.getRange(metadataValueRange).getValues());
   var deskFolder = currentFolder.createFolder(deskPrefix);
   for (var i = 0; i < deskConfigValues.length; i++) {
     var deskCode = deskConfigValues[i][deskConfigCols.desk - 1];
@@ -81,8 +90,12 @@ function generateAllFile() {
     DriveApp.getFileById(deskSS.getId()).moveTo(deskFolder);
     controlSheet.getRange(i + 2, deskControlCols.status).setFormula('=\'' + deskName + '\'!' + deskStatusRange);
     addMetadata(deskSS);
-    //TODO: add Info sheet for desk
-    //TODO: add authentication for desk
+
+    // add Info sheet for each desk
+    currentSS.getSheetByName(infoSheetName).copyTo(deskSS).setName(infoSheetName);
+    // add authentication for desk
+    deskSS.addEditors([deskConfigValues[i][deskConfigCols.email1-1], deskConfigValues[i][deskConfigCols.email2-1]]);
+
   }
 }
 
@@ -98,7 +111,7 @@ function getMetadataSS(name) {
 }
 
 function getDesks() {
-    var deskConfigValues = SpreadsheetApp.openById(configTemplateId).getSheetByName(deskConfigSheetName).getRange(dekConfigValueRange).getValues();
+    var deskConfigValues = SpreadsheetApp.openById(configTemplateId).getSheetByName(deskConfigSheetName).getRange(deskConfigValueRange).getValues();
     var desks = [];
     for (var i = 0; i < deskConfigValues.length; i++) {
         if (deskConfigValues[i][deskConfigCols.desk - 1] === '') {

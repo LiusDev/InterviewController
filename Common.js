@@ -1,13 +1,14 @@
-var webAppUrl = 'https://script.google.com/macros/s/AKfycby_20Wg82Lk6KJKOCwMYS_YRePQ3WwHZ4wAowXOb2EbcJcNUDITLnTYWsVmTnbxsMzI/exec';
+var webAppUrl = 'https://script.google.com/macros/s/AKfycbxDiwqjeBu7m7fUooPUmHnqk5PJgwp69TdBorvJo11sE_wcVrxI7xemDEOVn6Axjjxtow/exec';
 var logSheetName = 'LOG';
 var checkinSheetName = 'Check_in';
 var controllingSheetName = 'Điều phối';
 var deskPrefix = 'Bàn PV ';
+var infoSheetName = 'Thông tin ứng viên';
 
-var configTemplateId = '1cVdamGyoX4tm6d2iuJDLmQSFmVqkSTHhR8CJs4LQZbk';
-var checkinTemplateId = '13cxT8FMWXwsC6VpjlECZwrRvr1NMKpXTm2HR-mxXdzM';
-var controllingTemplateId = '1gpXbVMlSQBAODvia6JCI_y0o-TlgjKJCDDdHHMRkvl0';
-var interviewDeskTemplateId = '1Cx8smNTm7Jh8V3rCZfyZKeNRtHQOA3Gi3TFE897RRHo';
+var configTemplateId = '1ZNdFNmLt_mlljNkiT-SNWuk7DuTf1bxYSALmzvqlTNg';
+var checkinTemplateId = '1T_tp_O4DnojgE_QmJkAckzvOg5GyFIeM4fY8btTQBG8';
+var controllingTemplateId = '1yo8bQbSNpwZvZURCdxlcUYpzW1m8aukWKfcBMEl3rP4';
+var interviewDeskTemplateId = '1xCq5epQvX2bjrC8YRu6UopiXFc9qU1FNNXAje-x9qww';
 
 var statusValues = [
     '0_Đã check-in',
@@ -16,6 +17,7 @@ var statusValues = [
     '3_Đang phỏng vấn',
     '4_Đã phỏng vấn'
 ]
+
 var candidateCols = {
     id: 2,
     name: 3,
